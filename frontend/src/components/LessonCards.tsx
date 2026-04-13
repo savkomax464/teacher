@@ -118,6 +118,7 @@ const LessonCards: React.FC<LessonCardsProps> = ({ isOpen, onClose, teacherName 
                     {lesson.description}
                   </p>
                 </div>
+                {/* Desktop: progress on the right */}
                 {!isMobile && (
                   <div style={styles.lessonProgress}>
                     <span style={{
@@ -128,6 +129,29 @@ const LessonCards: React.FC<LessonCardsProps> = ({ isOpen, onClose, teacherName 
                       {lesson.progress}%
                     </span>
                     <div style={styles.progressBarBg}>
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${lesson.progress}%` }}
+                        transition={{ delay: index * 0.025 + 0.2, duration: 0.5, ease: 'easeOut' }}
+                        style={{
+                          ...styles.progressBarFill,
+                          backgroundColor: lesson.progress === 100 ? 'var(--color-accent)' : 'var(--color-text-tertiary)',
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
+                {/* Mobile: progress below title/desc */}
+                {isMobile && (
+                  <div style={styles.lessonProgressMobile}>
+                    <span style={{
+                      ...styles.progressText,
+                      fontSize: '14px',
+                      color: lesson.progress === 100 ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                    }}>
+                      {lesson.progress}%
+                    </span>
+                    <div style={styles.progressBarBgMobile}>
                       <motion.div
                         initial={{ width: 0 }}
                         animate={{ width: `${lesson.progress}%` }}
@@ -239,6 +263,23 @@ const styles: { [key: string]: React.CSSProperties } = {
     width: '60px',
     height: '4px',
     borderRadius: '2px',
+    backgroundColor: 'var(--color-bg-tertiary)',
+    overflow: 'hidden',
+  },
+  lessonProgressMobile: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
+    gap: '6px',
+    marginTop: '8px',
+    paddingTop: '10px',
+    borderTop: '1px solid var(--color-border)',
+    width: '100%',
+  },
+  progressBarBgMobile: {
+    width: '100%',
+    height: '5px',
+    borderRadius: '2.5px',
     backgroundColor: 'var(--color-bg-tertiary)',
     overflow: 'hidden',
   },
