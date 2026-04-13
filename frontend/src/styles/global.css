@@ -137,8 +137,12 @@ body {
 }
 
 @media (max-width: 768px) {
+    body,
+    #root {
+        padding-top: 60px !important;
+    }
     .page-container {
-        padding-top: 200px;
+        padding-top: 180px;
         padding-bottom: 20px;
         padding-left: 12px;
         padding-right: 12px;
