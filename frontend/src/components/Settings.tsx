@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface SettingsProps {
@@ -18,51 +18,83 @@ const languages = [
 ];
 
 const Settings: React.FC<SettingsProps> = ({ language, onLanguageChange }) => {
+  const [isMobile, setIsMobile] = useState(false);
   const [showLanguageDropdown, setShowLanguageDropdown] = useState(false);
   const currentLang = languages.find(l => l.code === language) || languages[0];
 
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
+
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.4 }}
-      style={styles.container}
-    >
+    <div className="page-container">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
       >
-        <h1 style={styles.title}>Settings</h1>
-        <p style={styles.subtitle}>Customize your learning experience</p>
+        <h1 className="page-title">Settings</h1>
+        <p className="page-subtitle">Customize your learning experience</p>
       </motion.div>
 
-      <div style={styles.settingsList}>
+      <div style={{
+        ...styles.settingsList,
+        maxWidth: isMobile ? '100%' : '600px',
+        marginLeft: isMobile ? '0' : 'auto',
+        marginRight: isMobile ? '0' : 'auto',
+      }}>
         {/* Language Setting */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.2 }}
-          style={styles.settingCard}
+          style={{
+            ...styles.settingCard,
+            padding: isMobile ? '16px' : '24px',
+          }}
         >
-          <div style={styles.settingHeader}>
-            <div style={styles.settingIcon}>🌐</div>
+          <div style={{
+            ...styles.settingHeader,
+            gap: isMobile ? '12px' : '16px',
+            marginBottom: isMobile ? '12px' : '16px',
+          }}>
+            <div style={{
+              ...styles.settingIcon,
+              fontSize: isMobile ? '24px' : '28px',
+            }}>🌐</div>
             <div style={styles.settingInfo}>
-              <h3 style={styles.settingTitle}>Language</h3>
-              <p style={styles.settingDescription}>Choose your preferred language</p>
+              <h3 style={{
+                ...styles.settingTitle,
+                fontSize: isMobile ? '16px' : '18px',
+              }}>Language</h3>
+              <p style={{
+                ...styles.settingDescription,
+                fontSize: isMobile ? '13px' : '14px',
+              }}>Choose your preferred language</p>
             </div>
           </div>
 
           <div style={styles.languageSelector}>
             <motion.button
-              whileHover={{ scale: 1.02 }}
+              whileHover={isMobile ? {} : { scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setShowLanguageDropdown(!showLanguageDropdown)}
-              style={styles.languageButton}
+              style={{
+                ...styles.languageButton,
+                padding: isMobile ? '12px 14px' : '14px 16px',
+              }}
             >
-              <span style={styles.languageFlag}>{currentLang.flag}</span>
-              <span style={styles.languageName}>{currentLang.name}</span>
+              <span style={{
+                ...styles.languageFlag,
+                fontSize: isMobile ? '20px' : '24px',
+              }}>{currentLang.flag}</span>
+              <span style={{
+                ...styles.languageName,
+                fontSize: isMobile ? '15px' : '16px',
+              }}>{currentLang.name}</span>
               <span style={styles.dropdownArrow}>{showLanguageDropdown ? '▲' : '▼'}</span>
             </motion.button>
 
@@ -73,7 +105,10 @@ const Settings: React.FC<SettingsProps> = ({ language, onLanguageChange }) => {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.2 }}
-                  style={styles.dropdown}
+                  style={{
+                    ...styles.dropdown,
+                    padding: isMobile ? '6px' : '8px',
+                  }}
                 >
                   {languages.map((lang, index) => (
                     <motion.button
@@ -81,18 +116,25 @@ const Settings: React.FC<SettingsProps> = ({ language, onLanguageChange }) => {
                       initial={{ opacity: 0, x: -10 }}
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: index * 0.03 }}
-                      whileHover={{ backgroundColor: 'var(--color-surface-hover)' }}
+                      whileHover={isMobile ? {} : { backgroundColor: 'var(--color-surface-hover)' }}
                       onClick={() => {
                         onLanguageChange(lang.code);
                         setShowLanguageDropdown(false);
                       }}
                       style={{
                         ...styles.dropdownItem,
+                        padding: isMobile ? '10px 14px' : '12px 16px',
                         backgroundColor: language === lang.code ? 'var(--color-accent-dim)' : 'transparent',
                       }}
                     >
-                      <span style={styles.dropdownFlag}>{lang.flag}</span>
-                      <span style={styles.dropdownName}>{lang.name}</span>
+                      <span style={{
+                        ...styles.dropdownFlag,
+                        fontSize: isMobile ? '18px' : '20px',
+                      }}>{lang.flag}</span>
+                      <span style={{
+                        ...styles.dropdownName,
+                        fontSize: isMobile ? '14px' : '15px',
+                      }}>{lang.name}</span>
                       {language === lang.code && (
                         <span style={styles.checkmark}>✓</span>
                       )}
@@ -109,13 +151,29 @@ const Settings: React.FC<SettingsProps> = ({ language, onLanguageChange }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.3 }}
-          style={styles.settingCard}
+          style={{
+            ...styles.settingCard,
+            padding: isMobile ? '16px' : '24px',
+          }}
         >
-          <div style={styles.settingHeader}>
-            <div style={styles.settingIcon}>🎨</div>
+          <div style={{
+            ...styles.settingHeader,
+            gap: isMobile ? '12px' : '16px',
+            marginBottom: isMobile ? '12px' : '16px',
+          }}>
+            <div style={{
+              ...styles.settingIcon,
+              fontSize: isMobile ? '24px' : '28px',
+            }}>🎨</div>
             <div style={styles.settingInfo}>
-              <h3 style={styles.settingTitle}>Theme</h3>
-              <p style={styles.settingDescription}>Dark mode (default)</p>
+              <h3 style={{
+                ...styles.settingTitle,
+                fontSize: isMobile ? '16px' : '18px',
+              }}>Theme</h3>
+              <p style={{
+                ...styles.settingDescription,
+                fontSize: isMobile ? '13px' : '14px',
+              }}>Dark mode (default)</p>
             </div>
           </div>
           <div style={styles.themeBadge}>Dark</div>
@@ -126,71 +184,64 @@ const Settings: React.FC<SettingsProps> = ({ language, onLanguageChange }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.4 }}
-          style={styles.settingCard}
+          style={{
+            ...styles.settingCard,
+            padding: isMobile ? '16px' : '24px',
+          }}
         >
-          <div style={styles.settingHeader}>
-            <div style={styles.settingIcon}>ℹ️</div>
+          <div style={{
+            ...styles.settingHeader,
+            gap: isMobile ? '12px' : '16px',
+          }}>
+            <div style={{
+              ...styles.settingIcon,
+              fontSize: isMobile ? '24px' : '28px',
+            }}>ℹ️</div>
             <div style={styles.settingInfo}>
-              <h3 style={styles.settingTitle}>About Teacher AI</h3>
-              <p style={styles.settingDescription}>Version 1.0.0</p>
+              <h3 style={{
+                ...styles.settingTitle,
+                fontSize: isMobile ? '16px' : '18px',
+              }}>About Teacher AI</h3>
+              <p style={{
+                ...styles.settingDescription,
+                fontSize: isMobile ? '13px' : '14px',
+              }}>Version 1.0.0</p>
             </div>
           </div>
         </motion.div>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
 const styles: { [key: string]: React.CSSProperties } = {
-  container: {
-    padding: '120px 24px 40px',
-    maxWidth: '800px',
-    margin: '0 auto',
-  },
-  title: {
-    fontSize: '48px',
-    fontWeight: 700,
-    letterSpacing: '-1.5px',
-    marginBottom: '8px',
-    color: 'var(--color-text-primary)',
-  },
-  subtitle: {
-    fontSize: '18px',
-    color: 'var(--color-text-secondary)',
-    fontWeight: 400,
-    marginBottom: '40px',
-  },
   settingsList: {
     display: 'flex',
     flexDirection: 'column',
-    gap: '16px',
+    gap: '12px',
   },
   settingCard: {
     backgroundColor: 'var(--color-surface)',
     borderRadius: 'var(--radius-xl)',
-    padding: '24px',
     border: '1px solid var(--color-border)',
   },
   settingHeader: {
     display: 'flex',
     alignItems: 'center',
-    gap: '16px',
-    marginBottom: '16px',
   },
   settingIcon: {
-    fontSize: '28px',
+    flexShrink: 0,
   },
   settingInfo: {
     flex: 1,
+    minWidth: 0,
   },
   settingTitle: {
-    fontSize: '18px',
     fontWeight: 600,
-    marginBottom: '4px',
+    marginBottom: '3px',
     color: 'var(--color-text-primary)',
   },
   settingDescription: {
-    fontSize: '14px',
     color: 'var(--color-text-secondary)',
   },
   languageSelector: {
@@ -199,9 +250,8 @@ const styles: { [key: string]: React.CSSProperties } = {
   languageButton: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
+    gap: '10px',
     width: '100%',
-    padding: '14px 16px',
     backgroundColor: 'var(--color-bg-tertiary)',
     border: '1px solid var(--color-border)',
     borderRadius: 'var(--radius-md)',
@@ -209,11 +259,10 @@ const styles: { [key: string]: React.CSSProperties } = {
     transition: 'all 0.2s ease',
   },
   languageFlag: {
-    fontSize: '24px',
+    flexShrink: 0,
   },
   languageName: {
     flex: 1,
-    fontSize: '16px',
     fontWeight: 500,
     textAlign: 'left',
     color: 'var(--color-text-primary)',
@@ -221,37 +270,35 @@ const styles: { [key: string]: React.CSSProperties } = {
   dropdownArrow: {
     fontSize: '12px',
     color: 'var(--color-text-tertiary)',
+    flexShrink: 0,
   },
   dropdown: {
     position: 'absolute',
     top: '100%',
     left: 0,
     right: 0,
-    marginTop: '8px',
+    marginTop: '6px',
     backgroundColor: 'var(--color-surface)',
     border: '1px solid var(--color-border)',
     borderRadius: 'var(--radius-md)',
-    padding: '8px',
     zIndex: 100,
     boxShadow: 'var(--shadow-lg)',
   },
   dropdownItem: {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
+    gap: '10px',
     width: '100%',
-    padding: '12px 16px',
     border: 'none',
     borderRadius: 'var(--radius-sm)',
     cursor: 'pointer',
     transition: 'all 0.15s ease',
   },
   dropdownFlag: {
-    fontSize: '20px',
+    flexShrink: 0,
   },
   dropdownName: {
     flex: 1,
-    fontSize: '15px',
     fontWeight: 500,
     textAlign: 'left',
     color: 'var(--color-text-primary)',
@@ -259,10 +306,11 @@ const styles: { [key: string]: React.CSSProperties } = {
   checkmark: {
     color: 'var(--color-accent)',
     fontWeight: 600,
+    flexShrink: 0,
   },
   themeBadge: {
     display: 'inline-block',
-    padding: '8px 16px',
+    padding: '6px 14px',
     backgroundColor: 'var(--color-accent-dim)',
     color: 'var(--color-accent)',
     borderRadius: 'var(--radius-sm)',

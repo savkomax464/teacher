@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface CreateTeacherProps {
@@ -17,10 +17,18 @@ const suggestions = [
 ];
 
 const CreateTeacher: React.FC<CreateTeacherProps> = ({ onCreateTeacher }) => {
+  const [isMobile, setIsMobile] = useState(false);
   const [name, setName] = useState('');
   const [subject, setSubject] = useState('');
   const [description, setDescription] = useState('');
   const [step, setStep] = useState<'template' | 'custom' | 'form'>('template');
+
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 640);
+    check();
+    window.addEventListener('resize', check);
+    return () => window.removeEventListener('resize', check);
+  }, []);
 
   const handleSuggestionClick = (suggestion: typeof suggestions[0]) => {
     setName(suggestion.title);
@@ -41,20 +49,14 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({ onCreateTeacher }) => {
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      transition={{ duration: 0.4 }}
-      style={styles.container}
-    >
+    <div className="page-container">
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
       >
-        <h1 style={styles.title}>Create Teacher</h1>
-        <p style={styles.subtitle}>Design your perfect AI learning companion</p>
+        <h1 className="page-title">Create Teacher</h1>
+        <p className="page-subtitle">Design your perfect AI learning companion</p>
       </motion.div>
 
       <AnimatePresence mode="wait">
@@ -66,27 +68,47 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({ onCreateTeacher }) => {
             exit={{ opacity: 0, x: 30 }}
             transition={{ duration: 0.3 }}
           >
-            <h2 style={styles.sectionTitle}>Choose a template</h2>
-            <div style={styles.grid}>
+            <h2 style={{
+              ...styles.sectionTitle,
+              fontSize: isMobile ? '20px' : '24px',
+              marginBottom: isMobile ? '16px' : '24px',
+            }}>Choose a template</h2>
+            <div style={{
+              ...styles.grid,
+              gridTemplateColumns: isMobile ? '1fr' : 'repeat(auto-fill, minmax(260px, 1fr))',
+              gap: isMobile ? '10px' : '16px',
+            }}>
               {suggestions.map((suggestion, index) => (
                 <motion.button
                   key={suggestion.title}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: index * 0.05 }}
-                  whileHover={{ 
+                  whileHover={isMobile ? {} : {
                     scale: 1.03,
                     borderColor: 'var(--color-accent)',
                     boxShadow: 'var(--shadow-glow)'
                   }}
                   whileTap={{ scale: 0.97 }}
                   onClick={() => handleSuggestionClick(suggestion)}
-                  style={styles.suggestionCard}
+                  style={{
+                    ...styles.suggestionCard,
+                    padding: isMobile ? '14px' : '20px',
+                  }}
                 >
-                  <span style={styles.suggestionIcon}>{suggestion.icon}</span>
+                  <span style={{
+                    ...styles.suggestionIcon,
+                    fontSize: isMobile ? '26px' : '32px',
+                  }}>{suggestion.icon}</span>
                   <div style={styles.suggestionContent}>
-                    <h3 style={styles.suggestionTitle}>{suggestion.title}</h3>
-                    <p style={styles.suggestionPrompt}>{suggestion.prompt}</p>
+                    <h3 style={{
+                      ...styles.suggestionTitle,
+                      fontSize: isMobile ? '14px' : '16px',
+                    }}>{suggestion.title}</h3>
+                    <p style={{
+                      ...styles.suggestionPrompt,
+                      fontSize: isMobile ? '12px' : '13px',
+                    }}>{suggestion.prompt}</p>
                   </div>
                 </motion.button>
               ))}
@@ -96,20 +118,33 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({ onCreateTeacher }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
-              style={styles.divider}
+              style={{
+                ...styles.divider,
+                margin: isMobile ? '28px 0' : '40px 0',
+              }}
             >
               <div style={styles.dividerLine} />
-              <span style={styles.dividerText}>or</span>
+              <span style={{
+                ...styles.dividerText,
+                fontSize: isMobile ? '13px' : '14px',
+              }}>or</span>
               <div style={styles.dividerLine} />
             </motion.div>
 
             <motion.button
-              whileHover={{ scale: 1.02 }}
+              whileHover={isMobile ? {} : { scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => setStep('custom')}
-              style={styles.customButton}
+              style={{
+                ...styles.customButton,
+                padding: isMobile ? '16px' : '20px',
+                fontSize: isMobile ? '15px' : '16px',
+              }}
             >
-              <span style={styles.customButtonIcon}>✨</span>
+              <span style={{
+                ...styles.customButtonIcon,
+                fontSize: isMobile ? '20px' : '24px',
+              }}>✨</span>
               <span>Create from scratch</span>
             </motion.button>
           </motion.div>
@@ -123,62 +158,98 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({ onCreateTeacher }) => {
             exit={{ opacity: 0, x: step === 'custom' ? -30 : 30 }}
             transition={{ duration: 0.3 }}
             onSubmit={handleSubmit}
-            style={styles.form}
+            style={{
+              ...styles.form,
+              maxWidth: isMobile ? '100%' : '600px',
+            }}
           >
             <div style={styles.formGroup}>
-              <label style={styles.label}>Teacher Name</label>
+              <label style={{
+                ...styles.label,
+                fontSize: isMobile ? '13px' : '14px',
+              }}>Teacher Name</label>
               <motion.input
                 whileFocus={{ scale: 1.01 }}
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="e.g., Professor English"
-                style={styles.input}
+                style={{
+                  ...styles.input,
+                  padding: isMobile ? '12px 14px' : '14px 16px',
+                  fontSize: isMobile ? '15px' : '16px',
+                }}
               />
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>Subject</label>
+              <label style={{
+                ...styles.label,
+                fontSize: isMobile ? '13px' : '14px',
+              }}>Subject</label>
               <motion.input
                 whileFocus={{ scale: 1.01 }}
                 type="text"
                 value={subject}
                 onChange={(e) => setSubject(e.target.value)}
                 placeholder="e.g., English Language"
-                style={styles.input}
+                style={{
+                  ...styles.input,
+                  padding: isMobile ? '12px 14px' : '14px 16px',
+                  fontSize: isMobile ? '15px' : '16px',
+                }}
               />
             </div>
 
             <div style={styles.formGroup}>
-              <label style={styles.label}>Instructions</label>
+              <label style={{
+                ...styles.label,
+                fontSize: isMobile ? '13px' : '14px',
+              }}>Instructions</label>
               <motion.textarea
                 whileFocus={{ scale: 1.01 }}
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder="Tell your AI teacher what to focus on..."
-                style={styles.textarea}
+                style={{
+                  ...styles.textarea,
+                  padding: isMobile ? '12px 14px' : '14px 16px',
+                  fontSize: isMobile ? '15px' : '16px',
+                }}
                 rows={4}
               />
             </div>
 
-            <div style={styles.formActions}>
+            <div style={{
+              ...styles.formActions,
+              flexDirection: isMobile ? 'column-reverse' : 'row',
+              gap: isMobile ? '10px' : '16px',
+            }}>
               <motion.button
                 type="button"
-                whileHover={{ scale: 1.02 }}
+                whileHover={isMobile ? {} : { scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => setStep('template')}
-                style={styles.backButton}
+                style={{
+                  ...styles.backButton,
+                  padding: isMobile ? '14px' : '14px 24px',
+                  width: isMobile ? '100%' : 'auto',
+                  fontSize: isMobile ? '14px' : '15px',
+                }}
               >
                 ← Back to templates
               </motion.button>
               <motion.button
                 type="submit"
-                whileHover={{ scale: 1.02, boxShadow: 'var(--shadow-glow)' }}
+                whileHover={isMobile ? {} : { scale: 1.02, boxShadow: 'var(--shadow-glow)' }}
                 whileTap={{ scale: 0.98 }}
                 disabled={!name || !subject || !description}
                 style={{
                   ...styles.submitButton,
+                  padding: isMobile ? '14px' : '14px 32px',
+                  fontSize: isMobile ? '14px' : '15px',
                   opacity: !name || !subject || !description ? 0.5 : 1,
+                  width: isMobile ? '100%' : 'auto',
                 }}
               >
                 Create Teacher ✨
@@ -187,46 +258,23 @@ const CreateTeacher: React.FC<CreateTeacherProps> = ({ onCreateTeacher }) => {
           </motion.form>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 };
 
 const styles: { [key: string]: React.CSSProperties } = {
-  container: {
-    padding: '120px 24px 40px',
-    maxWidth: '1200px',
-    margin: '0 auto',
-  },
-  title: {
-    fontSize: '48px',
-    fontWeight: 700,
-    letterSpacing: '-1.5px',
-    marginBottom: '8px',
-    color: 'var(--color-text-primary)',
-  },
-  subtitle: {
-    fontSize: '18px',
-    color: 'var(--color-text-secondary)',
-    fontWeight: 400,
-    marginBottom: '40px',
-  },
   sectionTitle: {
-    fontSize: '24px',
     fontWeight: 600,
-    marginBottom: '24px',
     letterSpacing: '-0.5px',
     color: 'var(--color-text-primary)',
   },
   grid: {
     display: 'grid',
-    gridTemplateColumns: 'repeat(auto-fill, minmax(280px, 1fr))',
-    gap: '16px',
   },
   suggestionCard: {
     display: 'flex',
     alignItems: 'center',
-    gap: '16px',
-    padding: '20px',
+    gap: '14px',
     backgroundColor: 'var(--color-surface)',
     border: '1px solid var(--color-border)',
     borderRadius: 'var(--radius-lg)',
@@ -235,26 +283,29 @@ const styles: { [key: string]: React.CSSProperties } = {
     transition: 'all 0.2s ease',
   },
   suggestionIcon: {
-    fontSize: '32px',
+    flexShrink: 0,
   },
   suggestionContent: {
     flex: 1,
+    minWidth: 0,
   },
   suggestionTitle: {
-    fontSize: '16px',
     fontWeight: 600,
-    marginBottom: '4px',
+    marginBottom: '3px',
     color: 'var(--color-text-primary)',
   },
   suggestionPrompt: {
-    fontSize: '13px',
     color: 'var(--color-text-secondary)',
     lineHeight: 1.4,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    display: '-webkit-box',
+    WebkitLineClamp: 2,
+    WebkitBoxOrient: 'vertical',
   },
   divider: {
     display: 'flex',
     alignItems: 'center',
-    margin: '40px 0',
   },
   dividerLine: {
     flex: 1,
@@ -262,62 +313,53 @@ const styles: { [key: string]: React.CSSProperties } = {
     backgroundColor: 'var(--color-border)',
   },
   dividerText: {
-    padding: '0 16px',
+    padding: '0 14px',
     color: 'var(--color-text-tertiary)',
-    fontSize: '14px',
   },
   customButton: {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: '12px',
+    gap: '10px',
     width: '100%',
-    padding: '20px',
     backgroundColor: 'var(--color-surface)',
     border: '2px dashed var(--color-border-light)',
     borderRadius: 'var(--radius-lg)',
     color: 'var(--color-text-primary)',
-    fontSize: '16px',
     fontWeight: 600,
     cursor: 'pointer',
     transition: 'all 0.2s ease',
   },
   customButtonIcon: {
-    fontSize: '24px',
+    flexShrink: 0,
   },
   form: {
-    maxWidth: '600px',
     margin: '0 auto',
   },
   formGroup: {
-    marginBottom: '24px',
+    marginBottom: '20px',
   },
   label: {
     display: 'block',
-    fontSize: '14px',
     fontWeight: 500,
     color: 'var(--color-text-secondary)',
-    marginBottom: '8px',
+    marginBottom: '6px',
   },
   input: {
     width: '100%',
-    padding: '14px 16px',
     backgroundColor: 'var(--color-surface)',
     border: '1px solid var(--color-border)',
     borderRadius: 'var(--radius-md)',
     color: 'var(--color-text-primary)',
-    fontSize: '16px',
     transition: 'all 0.2s ease',
     outline: 'none',
   },
   textarea: {
     width: '100%',
-    padding: '14px 16px',
     backgroundColor: 'var(--color-surface)',
     border: '1px solid var(--color-border)',
     borderRadius: 'var(--radius-md)',
     color: 'var(--color-text-primary)',
-    fontSize: '16px',
     lineHeight: 1.5,
     resize: 'vertical' as const,
     transition: 'all 0.2s ease',
@@ -326,28 +368,23 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   formActions: {
     display: 'flex',
-    gap: '16px',
     justifyContent: 'flex-end',
-    marginTop: '32px',
+    marginTop: '28px',
   },
   backButton: {
-    padding: '14px 24px',
     backgroundColor: 'transparent',
     border: '1px solid var(--color-border)',
     borderRadius: 'var(--radius-md)',
     color: 'var(--color-text-secondary)',
-    fontSize: '15px',
     fontWeight: 500,
     cursor: 'pointer',
     transition: 'all 0.2s ease',
   },
   submitButton: {
-    padding: '14px 32px',
     backgroundColor: 'var(--color-accent)',
     border: 'none',
     borderRadius: 'var(--radius-md)',
     color: '#0a0a0a',
-    fontSize: '15px',
     fontWeight: 600,
     cursor: 'pointer',
     transition: 'all 0.2s ease',
