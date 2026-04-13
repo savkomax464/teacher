@@ -66,7 +66,10 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
   ];
 
   return (
-    <nav style={styles.nav}>
+    <nav style={{
+      ...styles.nav,
+      paddingTop: isMobile ? 'env(safe-area-inset-top, 0px)' : undefined,
+    }} className={isMobile ? 'mobile-nav' : ''}>
       <div style={styles.navContainer}>
         <motion.div
           initial={{ opacity: 0, y: -20 }}

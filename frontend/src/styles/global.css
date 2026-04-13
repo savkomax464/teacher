@@ -138,8 +138,11 @@ body {
 
 @media (max-width: 768px) {
     .page-container {
-        padding-top: 112px;
+        padding-top: 150px;
         padding-left: 12px;
         padding-right: 12px;
+    }
+    .mobile-nav {
+        padding-top: env(safe-area-inset-top, 0px);
     }
 }
