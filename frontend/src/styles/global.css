@@ -144,6 +144,7 @@ body {
         padding-right: 12px;
     }
     .mobile-nav {
+        top: 56px !important;
         padding-top: env(safe-area-inset-top, 0px);
     }
 }
