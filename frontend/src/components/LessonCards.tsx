@@ -93,6 +93,7 @@ const LessonCards: React.FC<LessonCardsProps> = ({ isOpen, onClose, teacherName 
                 style={{
                   ...styles.lessonCard,
                   padding: isMobile ? '16px' : '20px',
+                  flexDirection: isMobile ? 'column' : 'row',
                 }}
               >
                 <div style={{
@@ -100,7 +101,6 @@ const LessonCards: React.FC<LessonCardsProps> = ({ isOpen, onClose, teacherName 
                   width: isMobile ? '40px' : '48px',
                   height: isMobile ? '40px' : '48px',
                   fontSize: isMobile ? '15px' : '18px',
-                  marginBottom: isMobile ? '12px' : '0',
                 }}>
                   {lesson.id}
                 </div>
@@ -118,6 +118,28 @@ const LessonCards: React.FC<LessonCardsProps> = ({ isOpen, onClose, teacherName 
                     {lesson.description}
                   </p>
                 </div>
+                {!isMobile && (
+                  <div style={styles.lessonProgress}>
+                    <span style={{
+                      ...styles.progressText,
+                      fontSize: '16px',
+                      color: lesson.progress === 100 ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                    }}>
+                      {lesson.progress}%
+                    </span>
+                    <div style={styles.progressBarBg}>
+                      <motion.div
+                        initial={{ width: 0 }}
+                        animate={{ width: `${lesson.progress}%` }}
+                        transition={{ delay: index * 0.025 + 0.2, duration: 0.5, ease: 'easeOut' }}
+                        style={{
+                          ...styles.progressBarFill,
+                          backgroundColor: lesson.progress === 100 ? 'var(--color-accent)' : 'var(--color-text-tertiary)',
+                        }}
+                      />
+                    </div>
+                  </div>
+                )}
               </motion.div>
             ))}
           </div>
@@ -200,6 +222,30 @@ const styles: { [key: string]: React.CSSProperties } = {
   lessonContent: {
     flex: 1,
     minWidth: 0,
+  },
+  lessonProgress: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-end',
+    gap: '6px',
+    flexShrink: 0,
+    minWidth: '50px',
+  },
+  progressText: {
+    fontWeight: 600,
+    fontVariantNumeric: 'tabular-nums',
+  },
+  progressBarBg: {
+    width: '60px',
+    height: '4px',
+    borderRadius: '2px',
+    backgroundColor: 'var(--color-bg-tertiary)',
+    overflow: 'hidden',
+  },
+  progressBarFill: {
+    height: '100%',
+    borderRadius: '2px',
+    transition: 'background-color 0.2s ease',
   },
   lessonTitle: {
     fontWeight: 600,
