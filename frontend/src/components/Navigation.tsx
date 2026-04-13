@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
 
 type Tab = 'my-teachers' | 'create-teacher' | 'settings';
@@ -11,7 +11,7 @@ interface NavigationProps {
 const TeacherIcon: React.FC<{ active?: boolean }> = ({ active }) => {
   const c = active ? '#ffd60a' : '#6e6e73';
   return (
-    <svg width="24" height="24" viewBox="0 0 100 100" fill="none">
+    <svg width="32" height="32" viewBox="0 0 100 100" fill="none">
       <line x1="40" y1="20" x2="30" y2="6" stroke={c} strokeWidth="3.5" strokeLinecap="round" />
       <line x1="60" y1="20" x2="70" y2="6" stroke={c} strokeWidth="3.5" strokeLinecap="round" />
       <circle cx="30" cy="5" r="3" stroke={c} strokeWidth="2" />
@@ -50,26 +50,18 @@ const GearIcon: React.FC<{ active?: boolean }> = ({ active }) => (
 );
 
 const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 640);
-    check();
-    window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
-  }, []);
-
-  const tabs: { id: Tab; label: string; icon: (active: boolean) => React.ReactNode }[] = [
+  const tabs: {
+    id: Tab;
+    label: string;
+    icon: (active: boolean) => React.ReactNode;
+  }[] = [
     { id: 'my-teachers', label: 'My Teachers', icon: (active) => <TeacherIcon active={active} /> },
-    { id: 'create-teacher', label: 'Create', icon: (active) => <SparkleIcon active={active} /> },
+    { id: 'create-teacher', label: 'Create Teacher', icon: (active) => <SparkleIcon active={active} /> },
     { id: 'settings', label: 'Settings', icon: (active) => <GearIcon active={active} /> },
   ];
 
   return (
-    <nav style={{
-      ...styles.nav,
-      paddingTop: isMobile ? 'env(safe-area-inset-top, 0px)' : undefined,
-    }} className={isMobile ? 'mobile-nav' : ''}>
+    <nav style={styles.nav}>
       <div style={styles.navContainer}>
         <motion.div
           initial={{ opacity: 0, y: -20 }}
@@ -78,7 +70,7 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
           style={styles.logo}
         >
           <span style={styles.logoIcon}>🎓</span>
-          {!isMobile && <span style={styles.logoText}>Teacher AI</span>}
+          <span style={styles.logoText}>Teacher AI</span>
         </motion.div>
 
         <div style={styles.tabContainer}>
@@ -86,12 +78,9 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
             <motion.button
               key={tab.id}
               onClick={() => onTabChange(tab.id)}
-              style={{
-                ...styles.tab,
-                ...(isMobile ? styles.tabMobile : {}),
-              }}
-              whileHover={isMobile ? {} : { scale: 1.02 }}
-              whileTap={{ scale: 0.95 }}
+              style={styles.tab}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
             >
               {activeTab === tab.id && (
                 <motion.div
@@ -101,15 +90,12 @@ const Navigation: React.FC<NavigationProps> = ({ activeTab, onTabChange }) => {
                 />
               )}
               <span style={styles.tabIcon}>{tab.icon(activeTab === tab.id)}</span>
-              {(!isMobile || activeTab === tab.id) && (
-                <span style={{
-                  ...styles.tabLabel,
-                  ...(isMobile ? styles.tabLabelMobile : {}),
-                  color: activeTab === tab.id ? 'var(--color-accent)' : 'var(--color-text-secondary)',
-                }}>
-                  {isMobile ? tab.label.split(' ')[0] : tab.label}
-                </span>
-              )}
+              <span style={{
+                ...styles.tabLabel,
+                color: activeTab === tab.id ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+              }}>
+                {tab.label}
+              </span>
             </motion.button>
           ))}
         </div>
@@ -129,12 +115,11 @@ const styles: { [key: string]: React.CSSProperties } = {
     WebkitBackdropFilter: 'blur(20px) saturate(180%)',
     backgroundColor: 'rgba(10, 10, 10, 0.8)',
     borderBottom: '1px solid var(--color-border)',
-    paddingTop: 'env(safe-area-inset-top, 0)',
   },
   navContainer: {
     maxWidth: '1200px',
     margin: '0 auto',
-    padding: '12px 16px',
+    padding: '16px 24px',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -142,40 +127,33 @@ const styles: { [key: string]: React.CSSProperties } = {
   logo: {
     display: 'flex',
     alignItems: 'center',
-    gap: '10px',
-    flexShrink: 0,
+    gap: '12px',
   },
   logoIcon: {
-    fontSize: '24px',
+    fontSize: '28px',
   },
   logoText: {
-    fontSize: '18px',
+    fontSize: '20px',
     fontWeight: 600,
     letterSpacing: '-0.5px',
     color: 'var(--color-text-primary)',
-    whiteSpace: 'nowrap',
   },
   tabContainer: {
     display: 'flex',
-    gap: '6px',
+    gap: '8px',
     position: 'relative',
-    flexShrink: 0,
   },
   tab: {
     position: 'relative',
     display: 'flex',
     alignItems: 'center',
-    gap: '6px',
-    padding: '8px 14px',
+    gap: '8px',
+    padding: '10px 20px',
     border: 'none',
     borderRadius: 'var(--radius-md)',
     backgroundColor: 'transparent',
     cursor: 'pointer',
     transition: 'background-color 0.2s ease',
-  },
-  tabMobile: {
-    padding: '6px 10px',
-    gap: '4px',
   },
   activeTabBackground: {
     position: 'absolute',
@@ -188,16 +166,11 @@ const styles: { [key: string]: React.CSSProperties } = {
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    flexShrink: 0,
   },
   tabLabel: {
-    fontSize: '13px',
+    fontSize: '14px',
     fontWeight: 500,
     transition: 'color 0.2s ease',
-    whiteSpace: 'nowrap',
-  },
-  tabLabelMobile: {
-    fontSize: '11px',
   },
 };
 
