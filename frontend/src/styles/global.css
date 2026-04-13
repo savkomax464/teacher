@@ -25,6 +25,7 @@
     --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-base: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --transition-slow: 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    --nav-height: 64px;
 }
 
 * {
@@ -93,4 +94,46 @@ body {
 
 .glow-accent {
     box-shadow: var(--shadow-glow);
+}
+
+
+/* Page container */
+
+.page-container {
+    padding-top: calc(var(--nav-height) + 16px);
+    padding-bottom: 32px;
+    padding-left: 16px;
+    padding-right: 16px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.page-title {
+    font-size: clamp(28px, 6vw, 48px);
+    font-weight: 700;
+    letter-spacing: -1.5px;
+    margin-bottom: 8px;
+    color: var(--color-text-primary);
+}
+
+.page-subtitle {
+    font-size: clamp(14px, 3vw, 18px);
+    color: var(--color-text-secondary);
+    font-weight: 400;
+    margin-bottom: 24px;
+}
+
+
+/* Mobile responsive */
+
+@media (max-width: 768px) {
+     :root {
+        --nav-height: 56px;
+    }
+    .page-container {
+        padding-top: 76px;
+        padding-left: 12px;
+        padding-right: 12px;
+        padding-bottom: 24px;
+    }
 }
