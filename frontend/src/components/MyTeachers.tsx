@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AITeacherWatermark from './AITeacherWatermark';
+import LessonCards from './LessonCards';
 
 interface Teacher {
   id: string;
@@ -16,6 +17,8 @@ interface MyTeachersProps {
 
 const MyTeachers: React.FC<MyTeachersProps> = ({ teachers }) => {
   const [isMobile, setIsMobile] = useState(false);
+  const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
+  const [showLessons, setShowLessons] = useState(false);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 640);
@@ -23,6 +26,11 @@ const MyTeachers: React.FC<MyTeachersProps> = ({ teachers }) => {
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
+
+  const handleStartLearning = (teacher: Teacher) => {
+    setSelectedTeacher(teacher);
+    setShowLessons(true);
+  };
 
   return (
     <div className="page-container">
@@ -112,6 +120,10 @@ const MyTeachers: React.FC<MyTeachersProps> = ({ teachers }) => {
                   <motion.button
                     whileHover={isMobile ? {} : { scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleStartLearning(teacher);
+                    }}
                     style={{
                       ...styles.startButton,
                       padding: isMobile ? '12px' : '10px 20px',
@@ -125,6 +137,15 @@ const MyTeachers: React.FC<MyTeachersProps> = ({ teachers }) => {
             ))}
           </AnimatePresence>
         </div>
+      )}
+
+      {/* Lesson Cards Modal */}
+      {selectedTeacher && (
+        <LessonCards
+          isOpen={showLessons}
+          onClose={() => setShowLessons(false)}
+          teacherName={selectedTeacher.name}
+        />
       )}
     </div>
   );
