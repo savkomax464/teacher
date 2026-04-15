@@ -1,15 +1,25 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { lessons } from '../data/lessons';
+import LessonDetail from './LessonDetail';
 
 interface LessonCardsProps {
   isOpen: boolean;
   onClose: () => void;
   teacherName: string;
+  lessonProgress: Record<number, number>;
+  onProgressUpdate: (progress: Record<number, number>) => void;
 }
 
-const LessonCards: React.FC<LessonCardsProps> = ({ isOpen, onClose, teacherName }) => {
+const LessonCards: React.FC<LessonCardsProps> = ({
+  isOpen,
+  onClose,
+  teacherName,
+  lessonProgress,
+  onProgressUpdate,
+}) => {
   const [isMobile, setIsMobile] = useState(false);
+  const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 640);
@@ -29,123 +39,151 @@ const LessonCards: React.FC<LessonCardsProps> = ({ isOpen, onClose, teacherName 
 
   const cols = isMobile ? '1fr' : 'repeat(auto-fill, minmax(260px, 1fr))';
 
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          style={styles.fullscreen}
-        >
-          {/* Header */}
-          <div style={styles.header}>
-            <div style={styles.headerLeft}>
-              <motion.button
-                whileTap={{ scale: 0.9 }}
-                onClick={onClose}
-                style={styles.backButton}
-              >
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                  <path d="M15 18L9 12L15 6" stroke="var(--color-text-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                </svg>
-                <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
-                  Back
-                </span>
-              </motion.button>
-              <div style={styles.headerInfo}>
-                <h2 style={{
-                  ...styles.headerTitle,
-                  fontSize: isMobile ? '18px' : '24px',
-                }}>
-                  Lessons
-                </h2>
-                <p style={{
-                  ...styles.headerSubtitle,
-                  fontSize: isMobile ? '12px' : '14px',
-                }}>
-                  {teacherName} · {lessons.length} lessons
-                </p>
-              </div>
-            </div>
-          </div>
+  const handleProgressChange = (progress: Record<number, number>) => {
+    onProgressUpdate(progress);
+  };
 
-          {/* Lesson Grid */}
-          <div style={{
-            ...styles.grid,
-            gridTemplateColumns: cols,
-            gap: isMobile ? '10px' : '16px',
-            padding: isMobile ? '12px 16px 100px' : '24px 32px 100px',
-          }}>
-            {lessons.map((lesson, index) => (
-              <motion.div
-                key={lesson.id}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.025 }}
-                whileTap={{ scale: 0.97 }}
-                whileHover={isMobile ? {} : {
-                  y: -2,
-                  borderColor: 'var(--color-accent)',
-                  boxShadow: 'var(--shadow-glow)',
-                }}
-                style={{
-                  ...styles.lessonCard,
-                  padding: isMobile ? '16px' : '20px',
-                }}
-              >
-                <div style={{
-                  ...styles.lessonNumber,
-                  width: isMobile ? '40px' : '48px',
-                  height: isMobile ? '40px' : '48px',
-                  fontSize: isMobile ? '15px' : '18px',
-                }}>
-                  {lesson.id}
-                </div>
-                <div style={styles.lessonContent}>
-                  <h3 style={{
-                    ...styles.lessonTitle,
-                    fontSize: isMobile ? '15px' : '16px',
+  const handleNavigateToLesson = (lessonId: number) => {
+    setSelectedLessonId(lessonId);
+  };
+
+  return (
+    <>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            style={styles.fullscreen}
+          >
+            {/* Header */}
+            <div style={styles.header}>
+              <div style={styles.headerLeft}>
+                <motion.button
+                  whileTap={{ scale: 0.9 }}
+                  onClick={onClose}
+                  style={styles.backButton}
+                >
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+                    <path d="M15 18L9 12L15 6" stroke="var(--color-text-primary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                  <span style={{ fontSize: '15px', fontWeight: 600, color: 'var(--color-text-primary)' }}>
+                    Back
+                  </span>
+                </motion.button>
+                <div style={styles.headerInfo}>
+                  <h2 style={{
+                    ...styles.headerTitle,
+                    fontSize: isMobile ? '18px' : '24px',
                   }}>
-                    {lesson.title}
-                  </h3>
+                    Lessons
+                  </h2>
                   <p style={{
-                    ...styles.lessonDescription,
-                    fontSize: isMobile ? '12px' : '13px',
+                    ...styles.headerSubtitle,
+                    fontSize: isMobile ? '12px' : '14px',
                   }}>
-                    {lesson.description}
+                    {teacherName} · {lessons.length} lessons
                   </p>
                 </div>
-                <div style={styles.lessonProgress}>
-                  <span style={{
-                    ...styles.progressText,
-                    fontSize: isMobile ? '14px' : '16px',
-                    color: lesson.progress === 100 ? 'var(--color-accent)' : 'var(--color-text-secondary)',
-                  }}>
-                    {lesson.progress}%
-                  </span>
-                  <div style={{
-                    ...styles.progressBarBg,
-                    width: isMobile ? '45px' : '60px',
-                  }}>
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${lesson.progress}%` }}
-                      transition={{ delay: index * 0.025 + 0.2, duration: 0.5, ease: 'easeOut' }}
-                      style={{
-                        ...styles.progressBarFill,
-                        backgroundColor: lesson.progress === 100 ? 'var(--color-accent)' : 'var(--color-text-tertiary)',
-                      }}
-                    />
-                  </div>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+              </div>
+            </div>
+
+            {/* Lesson Grid */}
+            <div style={{
+              ...styles.grid,
+              gridTemplateColumns: cols,
+              gap: isMobile ? '10px' : '16px',
+              padding: isMobile ? '12px 16px 100px' : '24px 32px 100px',
+            }}>
+              {lessons.map((lesson, index) => {
+                const progress = lessonProgress[lesson.id] ?? lesson.progress;
+                return (
+                  <motion.div
+                    key={lesson.id}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.025 }}
+                    whileTap={{ scale: 0.97 }}
+                    onClick={() => setSelectedLessonId(lesson.id)}
+                    whileHover={isMobile ? {} : {
+                      y: -2,
+                      borderColor: 'var(--color-accent)',
+                      boxShadow: 'var(--shadow-glow)',
+                    }}
+                    style={{
+                      ...styles.lessonCard,
+                      padding: isMobile ? '16px' : '20px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <div style={{
+                      ...styles.lessonNumber,
+                      width: isMobile ? '40px' : '48px',
+                      height: isMobile ? '40px' : '48px',
+                      fontSize: isMobile ? '15px' : '18px',
+                    }}>
+                      {lesson.id}
+                    </div>
+                    <div style={styles.lessonContent}>
+                      <h3 style={{
+                        ...styles.lessonTitle,
+                        fontSize: isMobile ? '15px' : '16px',
+                      }}>
+                        {lesson.title}
+                      </h3>
+                      <p style={{
+                        ...styles.lessonDescription,
+                        fontSize: isMobile ? '12px' : '13px',
+                      }}>
+                        {lesson.description}
+                      </p>
+                    </div>
+                    <div style={styles.lessonProgress}>
+                      <span style={{
+                        ...styles.progressText,
+                        fontSize: isMobile ? '14px' : '16px',
+                        color: progress === 100 ? 'var(--color-accent)' : 'var(--color-text-secondary)',
+                      }}>
+                        {progress}%
+                      </span>
+                      <div style={{
+                        ...styles.progressBarBg,
+                        width: isMobile ? '45px' : '60px',
+                      }}>
+                        <motion.div
+                          initial={{ width: 0 }}
+                          animate={{ width: `${progress}%` }}
+                          transition={{ delay: index * 0.025 + 0.2, duration: 0.5, ease: 'easeOut' }}
+                          style={{
+                            ...styles.progressBarFill,
+                            backgroundColor: progress === 100 ? 'var(--color-accent)' : 'var(--color-text-tertiary)',
+                          }}
+                        />
+                      </div>
+                    </div>
+                  </motion.div>
+                );
+              })}
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Lesson Detail Overlay */}
+      <AnimatePresence>
+        {selectedLessonId !== null && (
+          <LessonDetail
+            lessonId={selectedLessonId}
+            onBack={() => setSelectedLessonId(null)}
+            onNavigateToLesson={handleNavigateToLesson}
+            lessonProgress={lessonProgress}
+            onProgressUpdate={handleProgressChange}
+          />
+        )}
+      </AnimatePresence>
+    </>
   );
 };
 

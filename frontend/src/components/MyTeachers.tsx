@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AITeacherWatermark from './AITeacherWatermark';
 import LessonCards from './LessonCards';
+import { getAllProgress } from '../utils/progress';
 
 interface Teacher {
   id: string;
@@ -19,6 +20,7 @@ const MyTeachers: React.FC<MyTeachersProps> = ({ teachers }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
   const [showLessons, setShowLessons] = useState(false);
+  const [lessonProgress, setLessonProgress] = useState<Record<number, number>>({});
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 640);
@@ -27,9 +29,19 @@ const MyTeachers: React.FC<MyTeachersProps> = ({ teachers }) => {
     return () => window.removeEventListener('resize', check);
   }, []);
 
+  useEffect(() => {
+    if (showLessons) {
+      setLessonProgress(getAllProgress());
+    }
+  }, [showLessons]);
+
   const handleStartLearning = (teacher: Teacher) => {
     setSelectedTeacher(teacher);
     setShowLessons(true);
+  };
+
+  const handleProgressUpdate = (progress: Record<number, number>) => {
+    setLessonProgress(progress);
   };
 
   return (
@@ -145,6 +157,8 @@ const MyTeachers: React.FC<MyTeachersProps> = ({ teachers }) => {
           isOpen={showLessons}
           onClose={() => setShowLessons(false)}
           teacherName={selectedTeacher.name}
+          lessonProgress={lessonProgress}
+          onProgressUpdate={handleProgressUpdate}
         />
       )}
     </div>
