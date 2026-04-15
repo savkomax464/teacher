@@ -125,7 +125,7 @@ const LessonDetail: React.FC<LessonDetailProps> = ({
           <div style={styles.headerInfo}>
             <h2 style={{
               ...styles.headerTitle,
-              fontSize: isMobile ? '17px' : '22px',
+              fontSize: isMobile ? '16px' : '20px',
             }}>
               {lesson.title}
             </h2>
@@ -134,23 +134,31 @@ const LessonDetail: React.FC<LessonDetailProps> = ({
               fontSize: isMobile ? '12px' : '13px',
             }}>
               Lesson {lesson.id}
-              {progress === 100 && (
-                <span style={{ color: 'var(--color-accent)', marginLeft: '8px' }}>
-                  ✓
-                </span>
-              )}
+              <span style={{
+                marginLeft: '8px',
+                fontFamily: "'JetBrains Mono', monospace",
+                fontWeight: 700,
+                fontSize: '12px',
+                color: progress === 100 ? 'var(--color-accent)' : 'var(--color-text-tertiary)',
+              }}>
+                {progress === 100 ? '✓ 100%' : `${progress}%`}
+              </span>
             </p>
           </div>
         </div>
-        {/* Progress badge in header */}
-        <div style={styles.progressBadge}>
-          <span style={{
-            ...styles.progressBadgeText,
-            color: progress === 100 ? 'var(--color-accent)' : 'var(--color-text-primary)',
-          }}>
-            {progress}%
-          </span>
-        </div>
+        <motion.button
+          whileTap={{ scale: 0.95 }}
+          whileHover={!isMobile ? { scale: 1.03 } : {}}
+          onClick={() => {/* Ask teacher action */}}
+          style={styles.askButton}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" />
+            <path d="M9 9a3 3 0 0 1 5.12 1.83c0 1.5-1.83 1.67-2.12 3.17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            <circle cx="12" cy="17" r="1" fill="currentColor" />
+          </svg>
+          <span style={{ fontSize: '13px', fontWeight: 600 }}>Ask Teacher</span>
+        </motion.button>
       </div>
 
       {/* Scrollable content */}
@@ -175,23 +183,6 @@ const LessonDetail: React.FC<LessonDetailProps> = ({
           }}>
             {lesson.title}
           </p>
-          {/* Progress bar under hero */}
-          <div style={styles.heroProgress}>
-            <div style={styles.heroProgressBg}>
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${progress}%` }}
-                transition={{ delay: 0.3, duration: 0.6, ease: 'easeOut' }}
-                style={{
-                  ...styles.heroProgressFill,
-                  backgroundColor: progress === 100 ? 'var(--color-accent)' : 'var(--color-accent)',
-                }}
-              />
-            </div>
-            <span style={styles.heroProgressLabel}>
-              {progress === 100 ? 'Completed' : `${progress}% complete`}
-            </span>
-          </div>
         </motion.div>
 
         <div style={styles.divider} />
@@ -467,17 +458,17 @@ const styles: { [key: string]: React.CSSProperties } = {
   headerSubtitle: {
     color: 'var(--color-text-secondary)',
   },
-  progressBadge: {
+  askButton: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '6px',
     backgroundColor: 'var(--color-accent-dim)',
+    color: 'var(--color-accent)',
     border: '1px solid var(--color-accent)',
-    borderRadius: 'var(--radius-sm)',
-    padding: '4px 10px',
+    borderRadius: 'var(--radius-md)',
+    padding: '8px 16px',
+    cursor: 'pointer',
     flexShrink: 0,
-  },
-  progressBadgeText: {
-    fontFamily: "'JetBrains Mono', monospace",
-    fontSize: '14px',
-    fontWeight: 700,
   },
   scrollContent: {
     flex: 1,
@@ -502,33 +493,6 @@ const styles: { [key: string]: React.CSSProperties } = {
     marginRight: 'auto',
     lineHeight: 1.4,
     marginBottom: '20px',
-  },
-  heroProgress: {
-    display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    gap: '12px',
-    maxWidth: '320px',
-    marginLeft: 'auto',
-    marginRight: 'auto',
-  },
-  heroProgressBg: {
-    flex: 1,
-    height: '6px',
-    borderRadius: '3px',
-    backgroundColor: 'var(--color-bg-tertiary)',
-    overflow: 'hidden',
-  },
-  heroProgressFill: {
-    height: '100%',
-    borderRadius: '3px',
-  },
-  heroProgressLabel: {
-    fontSize: '13px',
-    fontWeight: 600,
-    color: 'var(--color-text-secondary)',
-    flexShrink: 0,
-    whiteSpace: 'nowrap',
   },
   divider: {
     height: '1px',
