@@ -6,10 +6,10 @@ export interface Lesson {
 }
 
 export const lessons: Lesson[] = [
-  { id: 1, title: 'Introduction to Basics', description: 'Learn the fundamental concepts and terminology', progress: 100 },
-  { id: 2, title: 'Building Blocks', description: 'Understand core principles and structures', progress: 100 },
-  { id: 3, title: 'First Steps', description: 'Practice basic exercises to build confidence', progress: 65 },
-  { id: 4, title: 'Deep Dive', description: 'Explore intermediate topics in detail', progress: 30 },
+  { id: 1, title: 'Introduction to Basics', description: 'Learn the fundamental concepts and terminology', progress: 0 },
+  { id: 2, title: 'Building Blocks', description: 'Understand core principles and structures', progress: 0 },
+  { id: 3, title: 'First Steps', description: 'Practice basic exercises to build confidence', progress: 0 },
+  { id: 4, title: 'Deep Dive', description: 'Explore intermediate topics in detail', progress: 0 },
   { id: 5, title: 'Challenge Zone', description: 'Test your knowledge with harder problems', progress: 0 },
   { id: 6, title: 'Pattern Recognition', description: 'Identify common patterns and structures', progress: 0 },
   { id: 7, title: 'Problem Solving', description: 'Apply learned concepts to real scenarios', progress: 0 },

@@ -40,13 +40,23 @@ function App() {
   const renderContent = () => {
     switch (activeTab) {
       case 'my-teachers':
-        return <MyTeachers teachers={teachers} />;
+        return (
+          <MyTeachers
+            teachers={teachers}
+            onDeleteTeacher={(id) => setTeachers(teachers.filter((t) => t.id !== id))}
+          />
+        );
       case 'create-teacher':
         return <CreateTeacher onCreateTeacher={handleCreateTeacher} />;
       case 'settings':
         return <Settings language={language} onLanguageChange={setLanguage} />;
       default:
-        return <MyTeachers teachers={teachers} />;
+        return (
+          <MyTeachers
+            teachers={teachers}
+            onDeleteTeacher={(id) => setTeachers(teachers.filter((t) => t.id !== id))}
+          />
+        );
     }
   };
 

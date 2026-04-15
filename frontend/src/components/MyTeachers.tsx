@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AITeacherWatermark from './AITeacherWatermark';
 import LessonCards from './LessonCards';
-import { getAllProgress } from '../utils/progress';
+import { getAllProgress, clearAllProgress } from '../utils/progress';
 
 interface Teacher {
   id: string;
@@ -14,13 +14,15 @@ interface Teacher {
 
 interface MyTeachersProps {
   teachers: Teacher[];
+  onDeleteTeacher: (id: string) => void;
 }
 
-const MyTeachers: React.FC<MyTeachersProps> = ({ teachers }) => {
+const MyTeachers: React.FC<MyTeachersProps> = ({ teachers, onDeleteTeacher }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [selectedTeacher, setSelectedTeacher] = useState<Teacher | null>(null);
   const [showLessons, setShowLessons] = useState(false);
   const [lessonProgress, setLessonProgress] = useState<Record<number, number>>({});
+  const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 640);
@@ -116,6 +118,26 @@ const MyTeachers: React.FC<MyTeachersProps> = ({ teachers }) => {
                     }}>{teacher.name}</h3>
                     <span style={styles.subject}>{teacher.subject}</span>
                   </div>
+                  <motion.button
+                    whileTap={{ scale: 0.9 }}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (deleteConfirmId === teacher.id) {
+                        onDeleteTeacher(teacher.id);
+                        clearAllProgress();
+                        setDeleteConfirmId(null);
+                      } else {
+                        setDeleteConfirmId(teacher.id);
+                      }
+                    }}
+                    style={{
+                      ...styles.deleteButton,
+                      padding: isMobile ? '6px 10px' : '6px 12px',
+                      fontSize: isMobile ? '12px' : '13px',
+                    }}
+                  >
+                    {deleteConfirmId === teacher.id ? 'Confirm?' : 'Delete'}
+                  </motion.button>
                 </div>
                 <p style={{
                   ...styles.description,
@@ -252,6 +274,16 @@ const styles: { [key: string]: React.CSSProperties } = {
     cursor: 'pointer',
     transition: 'all 0.2s ease',
     textAlign: 'center',
+  },
+  deleteButton: {
+    backgroundColor: 'rgba(255, 59, 48, 0.1)',
+    color: '#ff3b30',
+    border: '1px solid rgba(255, 59, 48, 0.3)',
+    borderRadius: 'var(--radius-sm)',
+    fontWeight: 600,
+    cursor: 'pointer',
+    transition: 'all 0.2s ease',
+    flexShrink: 0,
   },
 };
 

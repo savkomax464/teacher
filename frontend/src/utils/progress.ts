@@ -38,3 +38,11 @@ export function markLessonComplete(lessonId: number): void {
 export function getAllProgress(): Record<number, number> {
   return loadProgress();
 }
+
+export function clearAllProgress(): void {
+  try {
+    localStorage.removeItem(STORAGE_KEY);
+  } catch {
+    // ignore
+  }
+}
