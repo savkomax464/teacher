@@ -9,6 +9,7 @@ interface LessonCardsProps {
   teacherName: string;
   lessonProgress: Record<number, number>;
   onProgressUpdate: (progress: Record<number, number>) => void;
+  onOpenChat?: (lessonId: number, lessonTitle: string) => void;
 }
 
 const LessonCards: React.FC<LessonCardsProps> = ({
@@ -17,6 +18,7 @@ const LessonCards: React.FC<LessonCardsProps> = ({
   teacherName,
   lessonProgress,
   onProgressUpdate,
+  onOpenChat,
 }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
@@ -180,6 +182,7 @@ const LessonCards: React.FC<LessonCardsProps> = ({
             onNavigateToLesson={handleNavigateToLesson}
             lessonProgress={lessonProgress}
             onProgressUpdate={handleProgressChange}
+            onOpenChat={onOpenChat}
           />
         )}
       </AnimatePresence>

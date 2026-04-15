@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import AITeacherWatermark from './AITeacherWatermark';
 import LessonCards from './LessonCards';
+import TeacherChat from './TeacherChat';
 import { getAllProgress, clearAllProgress } from '../utils/progress';
 
 interface Teacher {
@@ -23,6 +24,9 @@ const MyTeachers: React.FC<MyTeachersProps> = ({ teachers, onDeleteTeacher }) =>
   const [showLessons, setShowLessons] = useState(false);
   const [lessonProgress, setLessonProgress] = useState<Record<number, number>>({});
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null);
+  const [showChat, setShowChat] = useState(false);
+  const [selectedLessonId, setSelectedLessonId] = useState<number>(0);
+  const [selectedLessonTitle, setSelectedLessonTitle] = useState('');
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 640);
@@ -181,6 +185,25 @@ const MyTeachers: React.FC<MyTeachersProps> = ({ teachers, onDeleteTeacher }) =>
           teacherName={selectedTeacher.name}
           lessonProgress={lessonProgress}
           onProgressUpdate={handleProgressUpdate}
+          onOpenChat={(lessonId, lessonTitle) => {
+            setSelectedLessonId(lessonId);
+            setSelectedLessonTitle(lessonTitle);
+            setShowChat(true);
+          }}
+        />
+      )}
+
+      {/* Teacher Chat Modal */}
+      {showChat && selectedTeacher && (
+        <TeacherChat
+          lessonId={selectedLessonId}
+          lessonTitle={selectedLessonTitle}
+          teacherName={selectedTeacher.name}
+          onBack={() => {
+            setShowChat(false);
+            setSelectedLessonId(0);
+            setSelectedLessonTitle('');
+          }}
         />
       )}
     </div>

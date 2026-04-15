@@ -9,6 +9,7 @@ interface LessonDetailProps {
   onNavigateToLesson: (lessonId: number) => void;
   lessonProgress: Record<number, number>;
   onProgressUpdate: (progress: Record<number, number>) => void;
+  onOpenChat?: (lessonId: number, lessonTitle: string) => void;
 }
 
 const TOTAL_LESSONS = 20;
@@ -19,6 +20,7 @@ const LessonDetail: React.FC<LessonDetailProps> = ({
   onNavigateToLesson,
   lessonProgress: externalProgress,
   onProgressUpdate,
+  onOpenChat,
 }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [internalProgress, setInternalProgress] = useState<Record<number, number>>({});
@@ -149,7 +151,7 @@ const LessonDetail: React.FC<LessonDetailProps> = ({
         <motion.button
           whileTap={{ scale: 0.95 }}
           whileHover={!isMobile ? { scale: 1.03 } : {}}
-          onClick={() => {/* Ask teacher action */}}
+          onClick={() => onOpenChat?.(lessonId, lesson.title)}
           style={styles.askButton}
         >
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none">
