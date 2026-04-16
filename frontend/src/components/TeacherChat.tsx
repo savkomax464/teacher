@@ -257,7 +257,6 @@ const TeacherChat: React.FC<TeacherChatProps> = ({ lessonId, lessonTitle, teache
             placeholder="Ask anything about this lesson..."
             style={{
               ...styles.input,
-              fontSize: isMobile ? '13px' : '14px',
               padding: isMobile ? '10px 14px' : '12px 16px',
             }}
           />
@@ -407,6 +406,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: 'var(--color-text-primary)',
     outline: 'none',
     fontFamily: 'inherit',
+    WebkitAppearance: 'none',
+    fontSize: '16px',
   },
   sendButton: {
     backgroundColor: 'var(--color-accent)',
