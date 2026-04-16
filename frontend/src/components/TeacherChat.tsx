@@ -54,7 +54,20 @@ const TeacherChat: React.FC<TeacherChatProps> = ({ lessonId, lessonTitle, teache
     const check = () => setIsMobile(window.innerWidth < 640);
     check();
     window.addEventListener('resize', check);
-    return () => window.removeEventListener('resize', check);
+
+    // Prevent zoom on iOS
+    const preventZoom = (e: TouchEvent) => {
+      if (e.touches.length > 1) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener('touchstart', preventZoom, { passive: false });
+
+    return () => {
+      window.removeEventListener('resize', check);
+      document.removeEventListener('touchstart', preventZoom);
+    };
   }, []);
 
   useEffect(() => {
@@ -292,6 +305,8 @@ const styles: { [key: string]: React.CSSProperties } = {
     backgroundColor: 'var(--color-bg)',
     display: 'flex',
     flexDirection: 'column',
+    touchAction: 'pan-y',
+    WebkitOverflowScrolling: 'touch',
   },
   header: {
     display: 'flex',
