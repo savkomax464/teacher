@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { getLessons, Lesson } from '../services/api';
-import LessonDetail from './LessonDetail';
+import DynamicLessonDetail from './DynamicLessonDetail';
 
 interface LessonCardsProps {
   isOpen: boolean;
@@ -203,7 +203,8 @@ const LessonCards: React.FC<LessonCardsProps> = ({
       {/* Lesson Detail Overlay */}
       <AnimatePresence>
         {selectedLessonId !== null && (
-          <LessonDetail
+          <DynamicLessonDetail
+            teacherId={teacherId}
             lessonId={selectedLessonId}
             onBack={() => setSelectedLessonId(null)}
             onNavigateToLesson={handleNavigateToLesson}

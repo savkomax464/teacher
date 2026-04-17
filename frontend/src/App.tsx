@@ -5,7 +5,7 @@ import MyTeachers from './components/MyTeachers';
 import CreateTeacher from './components/CreateTeacher';
 import Settings from './components/Settings';
 import { initTelegramWebApp } from './utils/telegram';
-import { getTeachers, createTeacher, deleteTeacher, generateLessons, Teacher } from './services/api';
+import { getTeachers, createTeacher, deleteTeacher, generateLessons, generateLessonDetails, Teacher } from './services/api';
 import './styles/global.css';
 
 type Tab = 'my-teachers' | 'create-teacher' | 'settings';
@@ -47,7 +47,14 @@ function App() {
       setTeachers([newTeacher, ...teachers]);
 
       // Генерируем уроки в фоне
-      generateLessons(newTeacher.id).catch(err => {
+      generateLessons(newTeacher.id).then(() => {
+        // После генерации уроков, генерируем детали для первых 3 уроков
+        for (let i = 1; i <= 3; i++) {
+          generateLessonDetails(newTeacher.id, i).catch(err => {
+            console.error(`Failed to generate details for lesson ${i}:`, err);
+          });
+        }
+      }).catch(err => {
         console.error('Failed to generate lessons:', err);
       });
 
