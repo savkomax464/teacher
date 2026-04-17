@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { getLesson, Lesson } from '../services/api';
+import { getLesson, generateLessonDetails, Lesson } from '../services/api';
 import { setLessonProgress, loadProgress } from '../utils/progress';
 
 interface LessonDetailProps {
@@ -28,6 +28,7 @@ const DynamicLessonDetail: React.FC<LessonDetailProps> = ({
   const [internalProgress, setInternalProgress] = useState<Record<number, number>>({});
   const [lesson, setLesson] = useState<Lesson | null>(null);
   const [loading, setLoading] = useState(true);
+  const [generating, setGenerating] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const savedRef = useRef(false);
 
@@ -47,6 +48,21 @@ const DynamicLessonDetail: React.FC<LessonDetailProps> = ({
       setLoading(true);
       const data = await getLesson(teacherId, lessonId);
       setLesson(data);
+
+      // Если контент не сгенерирован, запускаем генерацию
+      if (!data.content || !data.content.rules || data.content.rules.length === 0) {
+        setGenerating(true);
+        try {
+          await generateLessonDetails(teacherId, lessonId);
+          // Перезагружаем урок с новым контентом
+          const updatedData = await getLesson(teacherId, lessonId);
+          setLesson(updatedData);
+        } catch (genError) {
+          console.error('Failed to generate lesson details:', genError);
+        } finally {
+          setGenerating(false);
+        }
+      }
     } catch (error) {
       console.error('Failed to load lesson:', error);
     } finally {
@@ -240,6 +256,16 @@ const DynamicLessonDetail: React.FC<LessonDetailProps> = ({
             }}>
               {lesson.essence || lesson.description}
             </p>
+            {generating && (
+              <p style={{
+                marginTop: '16px',
+                color: 'var(--color-accent)',
+                fontSize: isMobile ? '13px' : '14px',
+                fontStyle: 'italic',
+              }}>
+                ✨ Генерируем детальный контент урока...
+              </p>
+            )}
           </div>
         </motion.div>
 
