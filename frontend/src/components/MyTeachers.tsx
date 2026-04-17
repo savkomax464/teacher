@@ -180,6 +180,7 @@ const MyTeachers: React.FC<MyTeachersProps> = ({ teachers, onDeleteTeacher }) =>
         <LessonCards
           isOpen={showLessons}
           onClose={() => setShowLessons(false)}
+          teacherId={selectedTeacher.id}
           teacherName={selectedTeacher.name}
           lessonProgress={lessonProgress}
           onProgressUpdate={handleProgressUpdate}

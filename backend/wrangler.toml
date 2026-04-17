@@ -1,0 +1,23 @@
+name = "ai-teacher-backend"
+main = "src/index.ts"
+compatibility_date = "2024-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# D1 Database binding
+[[d1_databases]]
+binding = "DB"
+database_name = "ai-teacher-db"
+database_id = "b46f530f-3cc1-48fb-add1-5a0016360998"
+
+# Environment variables (secrets will be added via wrangler secret put)
+[vars]
+ENVIRONMENT = "development"
+
+# CORS settings
+[env.production]
+routes = [
+  { pattern = "api.yourdomain.com/*", zone_name = "yourdomain.com" }
+]
+
+[env.development]
+# For local development

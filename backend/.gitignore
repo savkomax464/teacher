@@ -1,0 +1,9 @@
+# Backend environment
+node_modules/
+dist/
+.wrangler/
+.dev.vars
+
+# Frontend environment
+.env
+.env.local

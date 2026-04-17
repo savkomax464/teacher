@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { lessons } from '../data/lessons';
+import { getLessons, Lesson } from '../services/api';
 import LessonDetail from './LessonDetail';
 
 interface LessonCardsProps {
   isOpen: boolean;
   onClose: () => void;
+  teacherId: string;
   teacherName: string;
   lessonProgress: Record<number, number>;
   onProgressUpdate: (progress: Record<number, number>) => void;
@@ -15,6 +16,7 @@ interface LessonCardsProps {
 const LessonCards: React.FC<LessonCardsProps> = ({
   isOpen,
   onClose,
+  teacherId,
   teacherName,
   lessonProgress,
   onProgressUpdate,
@@ -22,6 +24,8 @@ const LessonCards: React.FC<LessonCardsProps> = ({
 }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
+  const [lessons, setLessons] = useState<Lesson[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 640);
@@ -33,11 +37,24 @@ const LessonCards: React.FC<LessonCardsProps> = ({
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = 'hidden';
+      loadLessons();
     } else {
       document.body.style.overflow = '';
     }
     return () => { document.body.style.overflow = ''; };
-  }, [isOpen]);
+  }, [isOpen, teacherId]);
+
+  const loadLessons = async () => {
+    try {
+      setLoading(true);
+      const data = await getLessons(teacherId);
+      setLessons(data);
+    } catch (error) {
+      console.error('Failed to load lessons:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const cols = isMobile ? '1fr' : 'repeat(auto-fill, minmax(260px, 1fr))';
 
@@ -93,23 +110,32 @@ const LessonCards: React.FC<LessonCardsProps> = ({
             </div>
 
             {/* Lesson Grid */}
-            <div style={{
-              ...styles.grid,
-              gridTemplateColumns: cols,
-              gap: isMobile ? '10px' : '16px',
-              padding: isMobile ? '12px 16px 100px' : '24px 32px 100px',
-            }}>
-              {lessons.map((lesson, index) => {
-                const progress = lessonProgress[lesson.id] ?? lesson.progress;
-                return (
-                  <motion.div
-                    key={lesson.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.025 }}
-                    whileTap={{ scale: 0.97 }}
-                    onClick={() => setSelectedLessonId(lesson.id)}
-                    whileHover={isMobile ? {} : {
+            {loading ? (
+              <div style={{ padding: '60px 16px', textAlign: 'center' }}>
+                <p style={{ color: 'var(--color-text-secondary)' }}>Loading lessons...</p>
+              </div>
+            ) : lessons.length === 0 ? (
+              <div style={{ padding: '60px 16px', textAlign: 'center' }}>
+                <p style={{ color: 'var(--color-text-secondary)' }}>No lessons yet. AI is generating them...</p>
+              </div>
+            ) : (
+              <div style={{
+                ...styles.grid,
+                gridTemplateColumns: cols,
+                gap: isMobile ? '10px' : '16px',
+                padding: isMobile ? '12px 16px 100px' : '24px 32px 100px',
+              }}>
+                {lessons.map((lesson, index) => {
+                  const progress = lessonProgress[lesson.lesson_number] ?? 0;
+                  return (
+                    <motion.div
+                      key={lesson.lesson_number}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: index * 0.025 }}
+                      whileTap={{ scale: 0.97 }}
+                      onClick={() => setSelectedLessonId(lesson.lesson_number)}
+                      whileHover={isMobile ? {} : {
                       y: -2,
                       borderColor: 'var(--color-accent)',
                       boxShadow: 'var(--shadow-glow)',
@@ -126,7 +152,7 @@ const LessonCards: React.FC<LessonCardsProps> = ({
                       height: isMobile ? '40px' : '48px',
                       fontSize: isMobile ? '15px' : '18px',
                     }}>
-                      {lesson.id}
+                      {lesson.lesson_number}
                     </div>
                     <div style={styles.lessonContent}>
                       <h3 style={{
@@ -169,6 +195,7 @@ const LessonCards: React.FC<LessonCardsProps> = ({
                 );
               })}
             </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
