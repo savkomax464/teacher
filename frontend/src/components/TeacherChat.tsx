@@ -1,52 +1,26 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { getChatHistory, sendChatMessage, ChatMessage } from '../services/api';
+import { lessonDetails } from '../data/lessonDetails';
 
-interface Message {
+interface Message extends ChatMessage {
   id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: number;
 }
 
 interface TeacherChatProps {
   lessonId: number;
   lessonTitle: string;
   teacherName: string;
+  teacherId: string;
   onBack: () => void;
 }
 
-const AI_RESPONSES: Record<number, string[]> = {
-  1: [
-    "Great question! Let me break this down for you. The fundamentals are the foundation — think of them like learning the alphabet before writing essays.",
-    "When you encounter a new concept, always ask yourself: 'What problem does this solve?' That perspective makes everything click.",
-    "Try this: write down the definition in your own words. If you can explain it simply, you truly understand it.",
-  ],
-  2: [
-    "Building blocks are all about composition. Start with small, focused pieces and combine them — just like LEGO bricks!",
-    "The key insight here is that every complex system is made of simple parts working together. Focus on making each part reliable.",
-    "A good rule of thumb: if you can't describe what a piece does in one sentence, it's probably doing too much.",
-  ],
-  3: [
-    "Practice is where theory becomes real. Don't worry about getting it right immediately — mistakes are the best teachers.",
-    "I'd recommend starting with the simplest exercise and gradually increasing difficulty. Confidence builds incrementally.",
-    "The most important thing is consistency. 20 minutes every day beats a 3-hour cram session once a week.",
-  ],
-};
-
-const GENERIC_RESPONSES = [
-  "That's an interesting observation. Let me think about this from a different angle...\n\nThe key insight is to focus on the underlying pattern rather than the surface details.",
-  "Good question! Here's how I'd approach it:\n\n1. Break the problem into smaller pieces\n2. Solve each piece independently\n3. Combine the solutions\n\nTry this approach and see where it gets you.",
-  "You're on the right track. Remember that understanding beats memorization every time. If you can explain why something works, you'll never forget it.",
-  "Let me give you a practical tip: whenever you learn something new, immediately try to teach it to someone else (or even to a rubber duck!). Teaching forces clarity.",
-  "The best way to master this is through deliberate practice. Don't just repeat what you know — push yourself slightly beyond your comfort zone each time.",
-  "Think about it this way: every expert was once a beginner. The difference is persistence. Keep going, and the concepts will become second nature.",
-];
-
-const TeacherChat: React.FC<TeacherChatProps> = ({ lessonId, lessonTitle, teacherName, onBack }) => {
+const TeacherChat: React.FC<TeacherChatProps> = ({ lessonId, lessonTitle, teacherName, teacherId, onBack }) => {
   const [isMobile, setIsMobile] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputValue, setInputValue] = useState('');
   const [isTyping, setIsTyping] = useState(false);
+  const [loading, setLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -55,7 +29,6 @@ const TeacherChat: React.FC<TeacherChatProps> = ({ lessonId, lessonTitle, teache
     check();
     window.addEventListener('resize', check);
 
-    // Prevent zoom on iOS
     const preventZoom = (e: TouchEvent) => {
       if (e.touches.length > 1) {
         e.preventDefault();
@@ -72,34 +45,53 @@ const TeacherChat: React.FC<TeacherChatProps> = ({ lessonId, lessonTitle, teache
 
   useEffect(() => {
     document.body.style.overflow = 'hidden';
-    // Welcome message
-    const welcome: Message = {
-      id: 'welcome',
-      role: 'assistant',
-      content: `Hi! I'm your AI teacher for "${lessonTitle}". Ask me anything about this lesson and I'll help you understand.`,
-      timestamp: Date.now(),
-    };
-    setMessages([welcome]);
+    loadChatHistory();
     return () => { document.body.style.overflow = ''; };
-  }, [lessonId, lessonTitle]);
+  }, [lessonId, teacherId]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
 
-  const getAIResponse = (): string => {
-    const lessonResponses = AI_RESPONSES[lessonId];
-    if (lessonResponses) {
-      const idx = messages.filter((m) => m.role === 'user').length % lessonResponses.length;
-      return lessonResponses[idx];
+  const loadChatHistory = async () => {
+    try {
+      setLoading(true);
+      const history = await getChatHistory(teacherId, lessonId);
+
+      const formattedMessages: Message[] = history.map((msg, idx) => ({
+        ...msg,
+        id: `${msg.role}-${msg.timestamp}-${idx}`,
+      }));
+
+      // Добавляем приветственное сообщение, если истории нет
+      if (formattedMessages.length === 0) {
+        const welcome: Message = {
+          id: 'welcome',
+          role: 'assistant',
+          content: `Hi! I'm your AI teacher for "${lessonTitle}". Ask me anything about this lesson and I'll help you understand.`,
+          timestamp: Date.now(),
+        };
+        setMessages([welcome]);
+      } else {
+        setMessages(formattedMessages);
+      }
+    } catch (error) {
+      console.error('Failed to load chat history:', error);
+      const welcome: Message = {
+        id: 'welcome',
+        role: 'assistant',
+        content: `Hi! I'm your AI teacher for "${lessonTitle}". Ask me anything about this lesson and I'll help you understand.`,
+        timestamp: Date.now(),
+      };
+      setMessages([welcome]);
+    } finally {
+      setLoading(false);
     }
-    const idx = messages.filter((m) => m.role === 'user').length % GENERIC_RESPONSES.length;
-    return GENERIC_RESPONSES[idx];
   };
 
-  const sendMessage = () => {
+  const sendMessage = async () => {
     const text = inputValue.trim();
-    if (!text) return;
+    if (!text || isTyping) return;
 
     const userMsg: Message = {
       id: `user-${Date.now()}`,
@@ -112,18 +104,36 @@ const TeacherChat: React.FC<TeacherChatProps> = ({ lessonId, lessonTitle, teache
     setInputValue('');
     setIsTyping(true);
 
-    // Simulate AI thinking delay
-    const delay = 800 + Math.random() * 1200;
-    setTimeout(() => {
+    try {
+      const lessonDetail = lessonDetails[lessonId];
+      const response = await sendChatMessage(
+        teacherId,
+        lessonId,
+        text,
+        lessonTitle,
+        lessonDetail?.essence
+      );
+
       const aiMsg: Message = {
-        id: `ai-${Date.now()}`,
+        id: `ai-${response.aiMessage.timestamp}`,
         role: 'assistant',
-        content: getAIResponse(),
+        content: response.aiMessage.content,
+        timestamp: response.aiMessage.timestamp,
+      };
+
+      setMessages((prev) => [...prev, aiMsg]);
+    } catch (error) {
+      console.error('Failed to send message:', error);
+      const errorMsg: Message = {
+        id: `error-${Date.now()}`,
+        role: 'assistant',
+        content: 'Sorry, I encountered an error. Please try again.',
         timestamp: Date.now(),
       };
-      setMessages((prev) => [...prev, aiMsg]);
+      setMessages((prev) => [...prev, errorMsg]);
+    } finally {
       setIsTyping(false);
-    }, delay);
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -168,92 +178,100 @@ const TeacherChat: React.FC<TeacherChatProps> = ({ lessonId, lessonTitle, teache
 
       {/* Messages */}
       <div style={styles.messagesContainer}>
-        <AnimatePresence initial={false}>
-          {messages.map((msg) => (
-            <motion.div
-              key={msg.id}
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-              style={{
-                ...styles.messageRow,
-                justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
-              }}
-            >
-              {msg.role === 'assistant' && (
+        {loading ? (
+          <div style={{ textAlign: 'center', padding: '20px' }}>
+            <p style={{ color: 'var(--color-text-secondary)' }}>Loading chat...</p>
+          </div>
+        ) : (
+          <>
+            <AnimatePresence initial={false}>
+              {messages.map((msg) => (
+                <motion.div
+                  key={msg.id}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  style={{
+                    ...styles.messageRow,
+                    justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start',
+                  }}
+                >
+                  {msg.role === 'assistant' && (
+                    <div style={styles.aiAvatar}>
+                      {teacherName.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <div style={{
+                    ...styles.messageBubble,
+                    backgroundColor: msg.role === 'user'
+                      ? 'var(--color-accent)'
+                      : 'var(--color-surface)',
+                    color: msg.role === 'user'
+                      ? '#000'
+                      : 'var(--color-text-primary)',
+                    borderBottomRightRadius: msg.role === 'user' ? '4px' : 'var(--radius-md)',
+                    borderBottomLeftRadius: msg.role === 'assistant' ? '4px' : 'var(--radius-md)',
+                    maxWidth: isMobile ? '85%' : '70%',
+                  }}>
+                    <p style={{
+                      fontSize: isMobile ? '13px' : '14px',
+                      lineHeight: 1.55,
+                      whiteSpace: 'pre-wrap',
+                      margin: 0,
+                    }}>
+                      {msg.content}
+                    </p>
+                    <span style={{
+                      fontSize: '10px',
+                      opacity: 0.5,
+                      marginTop: '6px',
+                      display: 'block',
+                      textAlign: msg.role === 'user' ? 'right' : 'left',
+                    }}>
+                      {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
+                </motion.div>
+              ))}
+            </AnimatePresence>
+
+            {/* Typing indicator */}
+            {isTyping && (
+              <motion.div
+                initial={{ opacity: 0, y: 12 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0 }}
+                style={{ ...styles.messageRow, justifyContent: 'flex-start' }}
+              >
                 <div style={styles.aiAvatar}>
                   {teacherName.charAt(0).toUpperCase()}
                 </div>
-              )}
-              <div style={{
-                ...styles.messageBubble,
-                backgroundColor: msg.role === 'user'
-                  ? 'var(--color-accent)'
-                  : 'var(--color-surface)',
-                color: msg.role === 'user'
-                  ? '#000'
-                  : 'var(--color-text-primary)',
-                borderBottomRightRadius: msg.role === 'user' ? '4px' : 'var(--radius-md)',
-                borderBottomLeftRadius: msg.role === 'assistant' ? '4px' : 'var(--radius-md)',
-                maxWidth: isMobile ? '85%' : '70%',
-              }}>
-                <p style={{
-                  fontSize: isMobile ? '13px' : '14px',
-                  lineHeight: 1.55,
-                  whiteSpace: 'pre-wrap',
-                  margin: 0,
+                <div style={{
+                  ...styles.messageBubble,
+                  backgroundColor: 'var(--color-surface)',
+                  padding: '12px 16px',
                 }}>
-                  {msg.content}
-                </p>
-                <span style={{
-                  fontSize: '10px',
-                  opacity: 0.5,
-                  marginTop: '6px',
-                  display: 'block',
-                  textAlign: msg.role === 'user' ? 'right' : 'left',
-                }}>
-                  {new Date(msg.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                </span>
-              </div>
-            </motion.div>
-          ))}
-        </AnimatePresence>
-
-        {/* Typing indicator */}
-        {isTyping && (
-          <motion.div
-            initial={{ opacity: 0, y: 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0 }}
-            style={{ ...styles.messageRow, justifyContent: 'flex-start' }}
-          >
-            <div style={styles.aiAvatar}>
-              {teacherName.charAt(0).toUpperCase()}
-            </div>
-            <div style={{
-              ...styles.messageBubble,
-              backgroundColor: 'var(--color-surface)',
-              padding: '12px 16px',
-            }}>
-              <div style={styles.typingDots}>
-                <motion.span
-                  animate={{ scale: [1, 1.3, 1] }}
-                  transition={{ duration: 0.8, repeat: Infinity, delay: 0 }}
-                  style={styles.typingDot}
-                />
-                <motion.span
-                  animate={{ scale: [1, 1.3, 1] }}
-                  transition={{ duration: 0.8, repeat: Infinity, delay: 0.15 }}
-                  style={styles.typingDot}
-                />
-                <motion.span
-                  animate={{ scale: [1, 1.3, 1] }}
-                  transition={{ duration: 0.8, repeat: Infinity, delay: 0.3 }}
-                  style={styles.typingDot}
-                />
-              </div>
-            </div>
-          </motion.div>
+                  <div style={styles.typingDots}>
+                    <motion.span
+                      animate={{ scale: [1, 1.3, 1] }}
+                      transition={{ duration: 0.8, repeat: Infinity, delay: 0 }}
+                      style={styles.typingDot}
+                    />
+                    <motion.span
+                      animate={{ scale: [1, 1.3, 1] }}
+                      transition={{ duration: 0.8, repeat: Infinity, delay: 0.15 }}
+                      style={styles.typingDot}
+                    />
+                    <motion.span
+                      animate={{ scale: [1, 1.3, 1] }}
+                      transition={{ duration: 0.8, repeat: Infinity, delay: 0.3 }}
+                      style={styles.typingDot}
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </>
         )}
         <div ref={messagesEndRef} />
       </div>

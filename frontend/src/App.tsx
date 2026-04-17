@@ -1,49 +1,104 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import Navigation from './components/Navigation';
 import MyTeachers from './components/MyTeachers';
 import CreateTeacher from './components/CreateTeacher';
 import Settings from './components/Settings';
+import { initTelegramWebApp } from './utils/telegram';
+import { getTeachers, createTeacher, deleteTeacher, Teacher } from './services/api';
 import './styles/global.css';
 
 type Tab = 'my-teachers' | 'create-teacher' | 'settings';
-
-interface Teacher {
-  id: string;
-  name: string;
-  subject: string;
-  description: string;
-  createdAt: string;
-}
 
 function App() {
   const [activeTab, setActiveTab] = useState<Tab>('my-teachers');
   const [teachers, setTeachers] = useState<Teacher[]>([]);
   const [language, setLanguage] = useState('en');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleCreateTeacher = (name: string, subject: string, description: string) => {
-    const newTeacher: Teacher = {
-      id: Date.now().toString(),
-      name,
-      subject,
-      description,
-      createdAt: new Date().toLocaleDateString('en-US', { 
-        month: 'short', 
-        day: 'numeric', 
-        year: 'numeric' 
-      }),
-    };
-    setTeachers([...teachers, newTeacher]);
-    setActiveTab('my-teachers');
+  // Инициализация Telegram WebApp
+  useEffect(() => {
+    initTelegramWebApp();
+  }, []);
+
+  // Загрузка учителей при монтировании
+  useEffect(() => {
+    loadTeachers();
+  }, []);
+
+  const loadTeachers = async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const data = await getTeachers();
+      setTeachers(data);
+    } catch (err) {
+      console.error('Failed to load teachers:', err);
+      setError('Failed to load teachers');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCreateTeacher = async (name: string, subject: string, description: string) => {
+    try {
+      const newTeacher = await createTeacher(name, subject, description);
+      setTeachers([newTeacher, ...teachers]);
+      setActiveTab('my-teachers');
+    } catch (err) {
+      console.error('Failed to create teacher:', err);
+      alert('Failed to create teacher. Please try again.');
+    }
+  };
+
+  const handleDeleteTeacher = async (id: string) => {
+    try {
+      await deleteTeacher(id);
+      setTeachers(teachers.filter((t) => t.id !== id));
+    } catch (err) {
+      console.error('Failed to delete teacher:', err);
+      alert('Failed to delete teacher. Please try again.');
+    }
   };
 
   const renderContent = () => {
+    if (loading) {
+      return (
+        <div style={{ padding: '60px 16px', textAlign: 'center' }}>
+          <p style={{ color: 'var(--color-text-secondary)' }}>Loading...</p>
+        </div>
+      );
+    }
+
+    if (error) {
+      return (
+        <div style={{ padding: '60px 16px', textAlign: 'center' }}>
+          <p style={{ color: '#ff3b30', marginBottom: '16px' }}>{error}</p>
+          <button
+            onClick={loadTeachers}
+            style={{
+              padding: '12px 24px',
+              backgroundColor: 'var(--color-accent)',
+              border: 'none',
+              borderRadius: '8px',
+              color: '#000',
+              fontWeight: 600,
+              cursor: 'pointer',
+            }}
+          >
+            Retry
+          </button>
+        </div>
+      );
+    }
+
     switch (activeTab) {
       case 'my-teachers':
         return (
           <MyTeachers
             teachers={teachers}
-            onDeleteTeacher={(id) => setTeachers(teachers.filter((t) => t.id !== id))}
+            onDeleteTeacher={handleDeleteTeacher}
           />
         );
       case 'create-teacher':
@@ -54,7 +109,7 @@ function App() {
         return (
           <MyTeachers
             teachers={teachers}
-            onDeleteTeacher={(id) => setTeachers(teachers.filter((t) => t.id !== id))}
+            onDeleteTeacher={handleDeleteTeacher}
           />
         );
     }

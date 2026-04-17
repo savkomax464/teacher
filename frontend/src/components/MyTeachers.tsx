@@ -3,15 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import AITeacherWatermark from './AITeacherWatermark';
 import LessonCards from './LessonCards';
 import TeacherChat from './TeacherChat';
-import { getAllProgress, clearAllProgress } from '../utils/progress';
-
-interface Teacher {
-  id: string;
-  name: string;
-  subject: string;
-  description: string;
-  createdAt: string;
-}
+import { Teacher } from '../services/api';
 
 interface MyTeachersProps {
   teachers: Teacher[];
@@ -34,12 +26,6 @@ const MyTeachers: React.FC<MyTeachersProps> = ({ teachers, onDeleteTeacher }) =>
     window.addEventListener('resize', check);
     return () => window.removeEventListener('resize', check);
   }, []);
-
-  useEffect(() => {
-    if (showLessons) {
-      setLessonProgress(getAllProgress());
-    }
-  }, [showLessons]);
 
   const handleStartLearning = (teacher: Teacher) => {
     setSelectedTeacher(teacher);
@@ -128,7 +114,6 @@ const MyTeachers: React.FC<MyTeachersProps> = ({ teachers, onDeleteTeacher }) =>
                       e.stopPropagation();
                       if (deleteConfirmId === teacher.id) {
                         onDeleteTeacher(teacher.id);
-                        clearAllProgress();
                         setDeleteConfirmId(null);
                       } else {
                         setDeleteConfirmId(teacher.id);
@@ -154,7 +139,13 @@ const MyTeachers: React.FC<MyTeachersProps> = ({ teachers, onDeleteTeacher }) =>
                   gap: isMobile ? '10px' : '0',
                   alignItems: isMobile ? 'stretch' : 'center',
                 }}>
-                  <span style={styles.date}>Created {teacher.createdAt}</span>
+                  <span style={styles.date}>
+                    Created {new Date(teacher.created_at).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric'
+                    })}
+                  </span>
                   <motion.button
                     whileHover={isMobile ? {} : { scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
@@ -199,6 +190,7 @@ const MyTeachers: React.FC<MyTeachersProps> = ({ teachers, onDeleteTeacher }) =>
           lessonId={selectedLessonId}
           lessonTitle={selectedLessonTitle}
           teacherName={selectedTeacher.name}
+          teacherId={selectedTeacher.id}
           onBack={() => {
             setShowChat(false);
             setSelectedLessonId(0);
