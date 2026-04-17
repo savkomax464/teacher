@@ -128,6 +128,56 @@ export async function sendChatMessage(
   return response;
 }
 
+// Lessons API
+export interface Lesson {
+  id: number;
+  teacher_id: string;
+  lesson_number: number;
+  title: string;
+  description: string;
+  essence: string;
+  steps: LessonStep[];
+  content: LessonContent | null;
+  created_at: number;
+}
+
+export interface LessonStep {
+  number: number;
+  title: string;
+  theory: string;
+  practice: string;
+}
+
+export interface LessonContent {
+  essence: string;
+  rules: string[];
+  example: string;
+  pitfalls: string[];
+}
+
+export async function generateLessons(teacherId: string): Promise<void> {
+  await apiRequest(`/api/lessons/generate/${teacherId}`, {
+    method: 'POST',
+  });
+}
+
+export async function getLessons(teacherId: string): Promise<Lesson[]> {
+  const response = await apiRequest<{ lessons: Lesson[] }>(`/api/lessons/${teacherId}`);
+  return response.lessons;
+}
+
+export async function getLesson(teacherId: string, lessonNumber: number): Promise<Lesson> {
+  const response = await apiRequest<{ lesson: Lesson }>(`/api/lessons/${teacherId}/${lessonNumber}`);
+  return response.lesson;
+}
+
+export async function generateLessonDetails(teacherId: string, lessonNumber: number): Promise<Lesson> {
+  const response = await apiRequest<{ lesson: Lesson }>(`/api/lessons/generate/${teacherId}/${lessonNumber}/details`, {
+    method: 'POST',
+  });
+  return response.lesson;
+}
+
 // Mock mode for development without Telegram
 export const isMockMode = !getTelegramUser();
 

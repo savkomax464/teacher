@@ -27,6 +27,13 @@ const MyTeachers: React.FC<MyTeachersProps> = ({ teachers, onDeleteTeacher }) =>
     return () => window.removeEventListener('resize', check);
   }, []);
 
+  useEffect(() => {
+    if (deleteConfirmId) {
+      const timer = setTimeout(() => setDeleteConfirmId(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [deleteConfirmId]);
+
   const handleStartLearning = (teacher: Teacher) => {
     setSelectedTeacher(teacher);
     setShowLessons(true);
