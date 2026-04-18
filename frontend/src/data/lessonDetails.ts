@@ -3,7 +3,7 @@ export interface LessonDetailData {
   title: string;
   icon: string;
   essence: string;
-  rules: string;
+  rules: string[];
   example: {
     description: string;
     code?: string;
