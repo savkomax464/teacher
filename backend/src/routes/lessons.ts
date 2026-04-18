@@ -73,11 +73,21 @@ lessons.post('/generate/:teacherId/:lessonNumber/details', async (c) => {
       return c.json({ error: 'Lesson not found' }, 404);
     }
 
+    // Получаем данные учителя для передачи subject
+    const teacher = await db.prepare(
+      'SELECT * FROM teachers WHERE id = ?'
+    ).bind(teacherId).first();
+
+    if (!teacher) {
+      return c.json({ error: 'Teacher not found' }, 404);
+    }
+
     // Генерируем 10 шагов
     const steps = await generateLessonSteps(
       c.env.GROQ_API_KEY,
       lesson.title as string,
-      lesson.description as string
+      lesson.description as string,
+      teacher.subject as string
     );
 
     // Генерируем детальный контент на основе первого шага
@@ -86,7 +96,8 @@ lessons.post('/generate/:teacherId/:lessonNumber/details', async (c) => {
       c.env.GROQ_API_KEY,
       firstStep.title,
       firstStep.theory,
-      firstStep.practice
+      firstStep.practice,
+      teacher.subject as string
     );
 
     // Обновляем урок в БД
