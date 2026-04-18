@@ -22,7 +22,7 @@ interface LessonStep {
 
 interface LessonContent {
   essence: string;
-  rules: string[];
+  rules: string;
   example: string;
   pitfalls: string[];
 }
@@ -221,7 +221,7 @@ function parseLessonContent(content: string): LessonContent {
   const sections = content.split(/(?=Суть:|Ключевые правила:|Примеры?:|Подводные камни|Нюансы:)/i);
 
   let essence = '';
-  let rules: string[] = [];
+  let rules = '';
   let example = '';
   let pitfalls: string[] = [];
 
@@ -229,8 +229,7 @@ function parseLessonContent(content: string): LessonContent {
     if (section.startsWith('Суть:')) {
       essence = section.replace('Суть:', '').trim();
     } else if (section.match(/Ключевые правила:/i)) {
-      const rulesText = section.replace(/Ключевые правила:/i, '').trim();
-      rules = rulesText.split(/[•\-\n]/).filter(r => r.trim()).map(r => r.trim());
+      rules = section.replace(/Ключевые правила:/i, '').trim();
     } else if (section.match(/Примеры?:/i)) {
       example = section.replace(/Примеры?:/i, '').trim();
     } else if (section.match(/Подводные камни|Нюансы:/i)) {

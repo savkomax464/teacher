@@ -227,30 +227,27 @@ const LessonDetail: React.FC<LessonDetailProps> = ({
             <div style={styles.sectionLabelLine} />
           </div>
           <h3 style={styles.sectionTitle}>Ключевые правила</h3>
-          <div style={{
-            ...styles.rulesGrid,
-            gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-          }}>
-            {lesson.rules.map((rule, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, x: i % 2 === 0 ? -30 : 30 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, amount: 0.3 }}
-                transition={{ delay: i * 0.07, duration: 0.4, ease: 'easeOut' }}
-                whileHover={!isMobile ? { y: -3, borderColor: 'var(--color-accent)', boxShadow: 'var(--shadow-glow)' } : {}}
-                style={styles.ruleCard}
-              >
-                <div style={styles.ruleBadge}>{String(i + 1).padStart(2, '0')}</div>
-                <p style={{
-                  ...styles.ruleText,
-                  fontSize: isMobile ? '13px' : '14px',
-                }}>
-                  {rule}
-                </p>
-              </motion.div>
-            ))}
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+            style={{
+              padding: isMobile ? '16px' : '20px',
+              backgroundColor: 'rgba(255, 255, 255, 0.05)',
+              borderRadius: '12px',
+              border: '1px solid rgba(255, 255, 255, 0.1)',
+            }}
+          >
+            <p style={{
+              fontSize: isMobile ? '14px' : '15px',
+              lineHeight: '1.8',
+              color: 'rgba(255, 255, 255, 0.9)',
+              whiteSpace: 'pre-wrap',
+            }}>
+              {lesson.rules}
+            </p>
+          </motion.div>
         </motion.div>
 
         <div style={styles.divider} />

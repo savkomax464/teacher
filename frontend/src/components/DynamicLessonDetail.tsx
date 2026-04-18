@@ -288,21 +288,19 @@ const DynamicLessonDetail: React.FC<LessonDetailProps> = ({
                   </div>
                   <h3 style={styles.sectionTitle}>Ключевые правила</h3>
                   <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: isMobile ? '1fr' : '1fr 1fr',
-                    gap: '12px',
+                    padding: isMobile ? '16px' : '20px',
+                    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+                    borderRadius: '12px',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
                   }}>
-                    {lesson.content.rules.map((rule, i) => (
-                      <div key={i} style={styles.ruleCard}>
-                        <div style={styles.ruleBadge}>{String(i + 1).padStart(2, '0')}</div>
-                        <p style={{
-                          ...styles.ruleText,
-                          fontSize: isMobile ? '13px' : '14px',
-                        }}>
-                          {rule}
-                        </p>
-                      </div>
-                    ))}
+                    <p style={{
+                      fontSize: isMobile ? '14px' : '15px',
+                      lineHeight: '1.8',
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      whiteSpace: 'pre-wrap',
+                    }}>
+                      {lesson.content.rules}
+                    </p>
                   </div>
                 </motion.div>
               </>

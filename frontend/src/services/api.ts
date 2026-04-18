@@ -150,7 +150,7 @@ export interface LessonStep {
 
 export interface LessonContent {
   essence: string;
-  rules: string[];
+  rules: string;
   example: string;
   pitfalls: string[];
 }
