@@ -218,7 +218,7 @@ function parseLessonSteps(content: string): LessonStep[] {
 }
 
 function parseLessonContent(content: string): LessonContent {
-  const sections = content.split(/(?=Суть:|Ключевые правила:|Пример:|Подводные камни|Нюансы:)/i);
+  const sections = content.split(/(?=Суть:|Ключевые правила:|Примеры?:|Подводные камни|Нюансы:)/i);
 
   let essence = '';
   let rules: string[] = [];
@@ -231,8 +231,8 @@ function parseLessonContent(content: string): LessonContent {
     } else if (section.match(/Ключевые правила:/i)) {
       const rulesText = section.replace(/Ключевые правила:/i, '').trim();
       rules = rulesText.split(/[•\-\n]/).filter(r => r.trim()).map(r => r.trim());
-    } else if (section.match(/Пример:/i)) {
-      example = section.replace(/Пример:/i, '').trim();
+    } else if (section.match(/Примеры?:/i)) {
+      example = section.replace(/Примеры?:/i, '').trim();
     } else if (section.match(/Подводные камни|Нюансы:/i)) {
       const pitfallsText = section.replace(/Подводные камни[:/]?|Нюансы:/gi, '').trim();
       pitfalls = pitfallsText.split(/[•\-\n]/).filter(p => p.trim()).map(p => p.trim());
