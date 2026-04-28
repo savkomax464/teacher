@@ -4,6 +4,7 @@ import Navigation from './components/Navigation';
 import MyTeachers from './components/MyTeachers';
 import CreateTeacher from './components/CreateTeacher';
 import Settings from './components/Settings';
+import LoadingSpinner from './components/LoadingSpinner';
 import { initTelegramWebApp } from './utils/telegram';
 import { getTeachers, createTeacher, deleteTeacher, generateLessons, generateLessonDetails, Teacher } from './services/api';
 import './styles/global.css';
@@ -77,11 +78,7 @@ function App() {
 
   const renderContent = () => {
     if (loading) {
-      return (
-        <div style={{ padding: '60px 16px', textAlign: 'center' }}>
-          <p style={{ color: 'var(--color-text-secondary)' }}>Loading...</p>
-        </div>
-      );
+      return <LoadingSpinner text="Loading teachers..." />;
     }
 
     if (error) {

@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { getLesson, generateLessonDetails, Lesson } from '../services/api';
 import { setLessonProgress, loadProgress } from '../utils/progress';
+import LoadingSpinner from './LoadingSpinner';
 
 interface LessonDetailProps {
   teacherId: string;
@@ -114,9 +115,7 @@ const DynamicLessonDetail: React.FC<LessonDetailProps> = ({
         transition={{ duration: 0.25 }}
         style={styles.root}
       >
-        <div style={{ padding: '60px 16px', textAlign: 'center' }}>
-          <p style={{ color: 'var(--color-text-secondary)' }}>Loading lesson...</p>
-        </div>
+        <LoadingSpinner text="Loading lesson..." size="large" />
       </motion.div>
     );
   }
